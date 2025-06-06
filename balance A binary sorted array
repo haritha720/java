@@ -1,0 +1,79 @@
+import java.util.*;
+
+class TreeNode {
+    int val;
+    TreeNode left, right;
+    TreeNode(int x) { val = x; }
+}
+
+class Solution {
+    public TreeNode balanceBST(TreeNode root) {
+        List<TreeNode> nodes = new ArrayList<>();
+        inorder(root, nodes);
+        return buildBalancedBST(nodes, 0, nodes.size() - 1);
+    }
+    
+    private void inorder(TreeNode root, List<TreeNode> nodes) {
+        if (root == null) return;
+        inorder(root.left, nodes);
+        nodes.add(root);
+        inorder(root.right, nodes);
+    }
+    
+    private TreeNode buildBalancedBST(List<TreeNode> nodes, int start, int end) {
+        if (start > end) return null;
+        int mid = start + (end - start) / 2;
+        TreeNode node = nodes.get(mid);
+        
+        // Clear previous pointers to avoid incorrect references
+        node.left = null;
+        node.right = null;
+        
+        node.left = buildBalancedBST(nodes, start, mid - 1);
+        node.right = buildBalancedBST(nodes, mid + 1, end);
+        return node;
+    }
+}
+
+public class Main {
+    // Helper method to print tree in level order for validation
+    public static void printTree(TreeNode root) {
+        if (root == null) {
+            System.out.println("[]");
+            return;
+        }
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        List<String> result = new ArrayList<>();
+        while (!queue.isEmpty()) {
+            TreeNode node = queue.poll();
+            if (node != null) {
+                result.add(String.valueOf(node.val));
+                queue.offer(node.left);
+                queue.offer(node.right);
+            } else {
+                result.add("null");
+            }
+        }
+        // Remove trailing "null"s for cleaner output
+        int i = result.size() - 1;
+        while (i >= 0 && result.get(i).equals("null")) {
+            result.remove(i);
+            i--;
+        }
+        System.out.println(result);
+    }
+    
+    public static void main(String[] args) {
+        // Build the input tree: [1,null,2,null,3,null,4]
+        TreeNode root = new TreeNode(1);
+        root.right = new TreeNode(2);
+        root.right.right = new TreeNode(3);
+        root.right.right.right = new TreeNode(4);
+        
+        Solution sol = new Solution();
+        TreeNode balancedRoot = sol.balanceBST(root);
+        
+        printTree(balancedRoot); // Expected output: [2,1,3,null,null,null,4]
+    }
+}
